@@ -22,15 +22,7 @@ SECRET_KEY = 'b^(93godjczln9v(6fc0t5xdysu0#sfmn1nazal&^$^46w5fox'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-TEMPLATE_DEBUG = True
-
 ALLOWED_HOSTS = []
-
-# For Django 1.7, use:
-TEMPLATE_CONTEXT_PROCESSORS = (
-    # Required by `allauth` template tags
-    'django.core.context_processors.request',
-)
 
 # If you are running Django 1.8+, specify the context processors
 # as follows:
@@ -41,10 +33,8 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
-                # Already defined Django-related contexts here
-
-                # `allauth` needs this from django
                 'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
             ],
         },
     },
