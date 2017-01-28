@@ -26,7 +26,9 @@ class LazyEnum(object):
 
     def __init__(self, *values, **kwargs):
         super(LazyEnum, self).__init__(**kwargs)
-        self.values = tuple(LazyEnum.Value(i, name) for i, name in enumerate(values))
+        self.values = tuple(
+            LazyEnum.Value(i, name) for i, name in enumerate(values)
+        )
         for value in self.values:
             setattr(self, str(value).upper(), value)
 
@@ -45,10 +47,12 @@ class LazyEnum(object):
     def __repr__(self):
         return "LazyEnum({})".format(", ".join(repr(enumerate(self.values))))
 
+
 # Create your models here.
 class Haus(models.Model):
     name = models.CharField(max_length=200)
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="owned_hauses")
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL,
+                              related_name="owned_hauses")
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, through="UAC")
 
 
@@ -59,12 +63,14 @@ class UAC(models.Model):
     haus = models.ForeignKey(Haus)
     level = models.PositiveSmallIntegerField(choices=LEVELS)
 
+
 class Device(models.Model):
     uuid = models.UUIDField(primary_key=True, editable=False)
     name = models.CharField(max_length=200)
     last_ping = models.DateTimeField(db_index=True, blank=True, null=True)
     haus = models.ForeignKey(Haus, blank=True, null=True)
     setup_secret = models.CharField(max_length=256)
+
 
 class Sensor(models.Model):
     CATEGORIES = LazyEnum(
