@@ -10,6 +10,7 @@ from django.conf.urls import url, include
 from rest_framework.decorators import api_view
 from rest_framework import generics
 from rest_framework.urlpatterns import format_suffix_patterns
+from rest_framework import permissions
 
 
 class JSONResponse(HttpResponse):
@@ -41,22 +42,10 @@ class HausSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'owner', 'users')
 
 
-# ViewSets define the view behavior.
-class HausViewSet(viewsets.ModelViewSet):
-    queryset = Haus.objects.all()
-    serializer_class = HausSerializer
-
-
 class DeviceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Device
         fields = ('uuid', 'name', 'last_ping', 'haus')
-
-
-# ViewSets define the view behavior.
-class DeviceViewSet(viewsets.ModelViewSet):
-    queryset = Device.objects.all()
-    serializer_class = DeviceSerializer
 
 
 class SensorSerializer(serializers.ModelSerializer):
@@ -71,50 +60,52 @@ class UACSerializer(serializers.ModelSerializer):
         fields = ('user', 'haus', 'level')
 
 
-# ViewSets define the view behavior.
-class SensorViewSet(viewsets.ModelViewSet):
-    queryset = Sensor.objects.all()
-    serializer_class = SensorSerializer
-
-
 class HausList(generics.ListCreateAPIView):
     queryset = Haus.objects.all()
     serializer_class = HausSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
 class HausDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Haus.objects.all()
     serializer_class = HausSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
 class DeviceList(generics.ListCreateAPIView):
     queryset = Device.objects.all()
     serializer_class = DeviceSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
 class DeviceDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Device.objects.all()
     serializer_class = DeviceSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
 class SensorList(generics.ListCreateAPIView):
     queryset = Sensor.objects.all()
     serializer_class = SensorSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
 class SensorDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Sensor.objects.all()
     serializer_class = SensorSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
 class UACList(generics.ListCreateAPIView):
     queryset = UAC.objects.all()
     serializer_class = UACSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
 class UACDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = UAC.objects.all()
     serializer_class = UACSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
 router = routers.DefaultRouter()
