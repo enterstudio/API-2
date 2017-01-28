@@ -84,6 +84,9 @@ INSTALLED_APPS = (
     'allauth.socialaccount.providers.twitter',
     'allauth.socialaccount.providers.google',
     'allauth.socialaccount.providers.spotify',
+
+    # local modules
+    'api',
 )
 
 MIDDLEWARE_CLASSES = (
