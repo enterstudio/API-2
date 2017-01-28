@@ -52,7 +52,7 @@ class LazyEnum(object):
 class Haus(models.Model):
     name = models.CharField(max_length=200)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL,
-                                related_name="owned_hauses")
+                              related_name="owned_hauses")
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, through="UAC")
 
 
