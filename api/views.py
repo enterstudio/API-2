@@ -8,6 +8,8 @@ from api.models import Haus, Device, Sensor, UAC
 from rest_framework import serializers, viewsets, routers
 from django.conf.urls import url, include
 from rest_framework.decorators import api_view
+from rest_framework import generics
+from rest_framework.urlpatterns import format_suffix_patterns
 
 class JSONResponse(HttpResponse):
     """
@@ -67,52 +69,33 @@ class SensorViewSet(viewsets.ModelViewSet):
     queryset = Sensor.objects.all()
     serializer_class = SensorSerializer
 
-@csrf_exempt
 
-@api_view(['GET', 'POST'])
-def haus_list(request):
-    """
-    List all code snippets, or create a new snippet.
-    """
-    if request.method == 'GET':
-        hauses = Haus.objects.all()
-        serializer = HausSerializer(hauses, many=True)
-        return JSONResponse(serializer.data)
+class HausList(generics.ListCreateAPIView):
+    queryset = Haus.objects.all()
+    serializer_class = HausSerializer
 
-    elif request.method == 'POST':
-        data = JSONParser().parse(request)
-        serializer = HausSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return JSONResponse(serializer.data, status=201)
-        return JSONResponse(serializer.errors, status=400)
 
-@csrf_exempt
-@api_view(['GET', 'PUT', 'DELETE'])
-def haus_detail(request, pk):
-    """
-    Retrieve, update or delete a code snippet.
-    """
-    try:
-        haus = Haus.objects.get(pk=pk)
-    except Haus.DoesNotExist:
-        return HttpResponse(status=404)
+class HausDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Haus.objects.all()
+    serializer_class = HausSerializer
 
-    if request.method == 'GET':
-        serializer = HausSerializer(haus)
-        return JSONResponse(serializer.data)
+class DeviceList(generics.ListCreateAPIView):
+    queryset = Device.objects.all()
+    serializer_class = DeviceSerializer
 
-    elif request.method == 'PUT':
-        data = JSONParser().parse(request)
-        serializer = HausSerializer(haus, data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return JSONResponse(serializer.data)
-        return JSONResponse(serializer.errors, status=400)
 
-    elif request.method == 'DELETE':
-        haus.delete()
-        return HttpResponse(status=204)
+class DeviceDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Device.objects.all()
+    serializer_class = DeviceSerializer
+
+class SensorList(generics.ListCreateAPIView):
+    queryset = Sensor.objects.all()
+    serializer_class = SensorSerializer
+
+
+class SensorDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Sensor.objects.all()
+    serializer_class = SensorSerializer
 
 
 router = routers.DefaultRouter()
@@ -120,7 +103,10 @@ router.register(r'allusers', UserViewSet)
 
 
 urlpatterns = [
-    url(r'^haus/$', haus_list),
-    url(r'^haus/(?P<pk>[0-9]+)/$', haus_detail),
-    url(r'^', include(router.urls)),
+    url(r'^haus/$', HausList.as_view()),
+    url(r'^haus/(?P<pk>[0-9]+)/$', HausDetail.as_view()),
 ]
+
+urlpatterns = format_suffix_patterns(urlpatterns)
+
+urlpatterns += [url(r'^', include(router.urls))]
