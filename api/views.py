@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from api.models import Haus, Device, Sensor, UAC
 from rest_framework import serializers, viewsets, routers
 from django.conf.urls import url, include
+from rest_framework.decorators import api_view
 
 class JSONResponse(HttpResponse):
     """
@@ -22,7 +23,7 @@ class JSONResponse(HttpResponse):
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
-        fields = ('url', 'username', 'is_staff')
+        fields = ('id', 'url', 'username', 'is_staff')
 
 
 # ViewSets define the view behavior.
@@ -34,7 +35,7 @@ class UserViewSet(viewsets.ModelViewSet):
 class HausSerializer(serializers.ModelSerializer):
     class Meta:
         model = Haus
-        fields = ('name', 'owner', 'users')
+        fields = ('id', 'name', 'owner', 'users')
 
 
 # ViewSets define the view behavior.
@@ -67,6 +68,8 @@ class SensorViewSet(viewsets.ModelViewSet):
     serializer_class = SensorSerializer
 
 @csrf_exempt
+
+@api_view(['GET', 'POST'])
 def haus_list(request):
     """
     List all code snippets, or create a new snippet.
@@ -85,6 +88,7 @@ def haus_list(request):
         return JSONResponse(serializer.errors, status=400)
 
 @csrf_exempt
+@api_view(['GET', 'PUT', 'DELETE'])
 def haus_detail(request, pk):
     """
     Retrieve, update or delete a code snippet.
