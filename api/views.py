@@ -35,6 +35,7 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         # Read permissions are allowed to any request,
         # so we'll always allow GET, HEAD or OPTIONS requests.
+        print("hi")
         if request.method in permissions.SAFE_METHODS:
             return True
 
@@ -53,7 +54,7 @@ class HausSerializer(serializers.ModelSerializer):
 class DeviceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Device
-        fields = ('uuid', 'name', 'last_ping', 'haus')
+        fields = ('name', 'last_ping', 'haus')
 
 
 class SensorSerializer(serializers.ModelSerializer):
@@ -96,7 +97,7 @@ class HausDetail(generics.RetrieveUpdateDestroyAPIView):
 class DeviceList(generics.ListCreateAPIView):
     queryset = Device.objects.all()
     serializer_class = DeviceSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsOwnerOrReadOnly,)
 
 
 class DeviceDetail(generics.RetrieveUpdateDestroyAPIView):
