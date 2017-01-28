@@ -13,6 +13,8 @@ from rest_framework.urlpatterns import format_suffix_patterns
 from rest_framework import permissions
 
 
+# Some JSONResponse stuff
+
 class JSONResponse(HttpResponse):
     """
     An HttpResponse that renders its content into JSON.
@@ -23,18 +25,24 @@ class JSONResponse(HttpResponse):
         super(JSONResponse, self).__init__(content, **kwargs)
 
 
-# Serializers define the API representation.
-class UserSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = User
-        fields = ('id', 'url', 'username', 'is_staff')
+# Permission classes
+
+class IsOwnerOrReadOnly(permissions.BasePermission):
+    """
+    Custom permission to only allow owners of an object to edit it.
+    """
+
+    def has_object_permission(self, request, view, obj):
+        # Read permissions are allowed to any request,
+        # so we'll always allow GET, HEAD or OPTIONS requests.
+        if request.method in permissions.SAFE_METHODS:
+            return True
+
+        # Write permissions are only allowed to the owner of the snippet.
+        return obj.owner == request.user
 
 
-# ViewSets define the view behavior.
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-
+# Serializers
 
 class HausSerializer(serializers.ModelSerializer):
     class Meta:
@@ -60,6 +68,19 @@ class UACSerializer(serializers.ModelSerializer):
         fields = ('user', 'haus', 'level')
 
 
+class UserSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'url', 'username', 'is_staff')
+
+
+# View classes
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+
 class HausList(generics.ListCreateAPIView):
     queryset = Haus.objects.all()
     serializer_class = HausSerializer
@@ -81,7 +102,8 @@ class DeviceList(generics.ListCreateAPIView):
 class DeviceDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Device.objects.all()
     serializer_class = DeviceSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,
+                          IsOwnerOrReadOnly)
 
 
 class SensorList(generics.ListCreateAPIView):
@@ -93,7 +115,8 @@ class SensorList(generics.ListCreateAPIView):
 class SensorDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Sensor.objects.all()
     serializer_class = SensorSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,
+                          IsOwnerOrReadOnly)
 
 
 class UACList(generics.ListCreateAPIView):
