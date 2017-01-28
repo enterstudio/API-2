@@ -11,6 +11,7 @@ from rest_framework.decorators import api_view
 from rest_framework import generics
 from rest_framework.urlpatterns import format_suffix_patterns
 
+
 class JSONResponse(HttpResponse):
     """
     An HttpResponse that renders its content into JSON.
@@ -79,6 +80,7 @@ class HausDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Haus.objects.all()
     serializer_class = HausSerializer
 
+
 class DeviceList(generics.ListCreateAPIView):
     queryset = Device.objects.all()
     serializer_class = DeviceSerializer
@@ -87,6 +89,7 @@ class DeviceList(generics.ListCreateAPIView):
 class DeviceDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Device.objects.all()
     serializer_class = DeviceSerializer
+
 
 class SensorList(generics.ListCreateAPIView):
     queryset = Sensor.objects.all()
