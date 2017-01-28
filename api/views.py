@@ -65,6 +65,12 @@ class SensorSerializer(serializers.ModelSerializer):
         fields = ('device', 'name', 'category', 'last_datum')
 
 
+class UACSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Sensor
+        fields = ('user', 'haus', 'level')
+
+
 # ViewSets define the view behavior.
 class SensorViewSet(viewsets.ModelViewSet):
     queryset = Sensor.objects.all()
@@ -101,6 +107,16 @@ class SensorDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = SensorSerializer
 
 
+class UACList(generics.ListCreateAPIView):
+    queryset = UAC.objects.all()
+    serializer_class = UACSerializer
+
+
+class UACDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = UAC.objects.all()
+    serializer_class = UACSerializer
+
+
 router = routers.DefaultRouter()
 router.register(r'allusers', UserViewSet)
 
@@ -108,6 +124,12 @@ router.register(r'allusers', UserViewSet)
 urlpatterns = [
     url(r'^haus/$', HausList.as_view()),
     url(r'^haus/(?P<pk>[0-9]+)/$', HausDetail.as_view()),
+    url(r'^device/$', DeviceList.as_view()),
+    url(r'^device/(?P<pk>[0-9]+)/$', DeviceDetail.as_view()),
+    url(r'^sensor/$', SensorList.as_view()),
+    url(r'^sensor/(?P<pk>[0-9]+)/$', SensorDetail.as_view()),
+    url(r'^uac/$', UACList.as_view()),
+    url(r'^uac/(?P<pk>[0-9]+)/$', UACDetail.as_view()),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
