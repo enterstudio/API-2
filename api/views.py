@@ -6,6 +6,7 @@ from rest_framework.parsers import JSONParser
 from django.contrib.auth.models import User
 from api.models import Haus, Device, Sensor, UAC
 from rest_framework import serializers, viewsets, routers
+from django.conf.urls import url, include
 
 class JSONResponse(HttpResponse):
     """
@@ -30,7 +31,7 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
 
 
-class HausSerializer(serializers.HyperlinkedModelSerializer):
+class HausSerializer(serializers.ModelSerializer):
     class Meta:
         model = Haus
         fields = ('name', 'owner', 'users')
@@ -42,9 +43,9 @@ class HausViewSet(viewsets.ModelViewSet):
     serializer_class = HausSerializer
 
 
-class DeviceSerializer(serializers.HyperlinkedModelSerializer):
+class DeviceSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
+        model = Device
         fields = ('uuid', 'name', 'last_ping', 'haus')
 
 
@@ -54,7 +55,7 @@ class DeviceViewSet(viewsets.ModelViewSet):
     serializer_class = DeviceSerializer
 
 
-class SensorSerializer(serializers.HyperlinkedModelSerializer):
+class SensorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sensor
         fields = ('device', 'name', 'category', 'last_datum')
@@ -65,11 +66,57 @@ class SensorViewSet(viewsets.ModelViewSet):
     queryset = Sensor.objects.all()
     serializer_class = SensorSerializer
 
+@csrf_exempt
+def haus_list(request):
+    """
+    List all code snippets, or create a new snippet.
+    """
+    if request.method == 'GET':
+        hauses = Haus.objects.all()
+        serializer = HausSerializer(hauses, many=True)
+        return JSONResponse(serializer.data)
+
+    elif request.method == 'POST':
+        data = JSONParser().parse(request)
+        serializer = HausSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return JSONResponse(serializer.data, status=201)
+        return JSONResponse(serializer.errors, status=400)
+
+@csrf_exempt
+def haus_detail(request, pk):
+    """
+    Retrieve, update or delete a code snippet.
+    """
+    try:
+        haus = Haus.objects.get(pk=pk)
+    except Haus.DoesNotExist:
+        return HttpResponse(status=404)
+
+    if request.method == 'GET':
+        serializer = HausSerializer(haus)
+        return JSONResponse(serializer.data)
+
+    elif request.method == 'PUT':
+        data = JSONParser().parse(request)
+        serializer = HausSerializer(haus, data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return JSONResponse(serializer.data)
+        return JSONResponse(serializer.errors, status=400)
+
+    elif request.method == 'DELETE':
+        haus.delete()
+        return HttpResponse(status=204)
+
 
 router = routers.DefaultRouter()
-router.register(r'users', UserViewSet)
-router.register(r'haus', HausViewSet)
-router.register(r'device', DeviceViewSet)
-router.register(r'sensor', SensorViewSet)
+router.register(r'allusers', UserViewSet)
 
-# Create your views here.
+
+urlpatterns = [
+    url(r'^haus/$', haus_list),
+    url(r'^haus/(?P<pk>[0-9]+)/$', haus_detail),
+    url(r'^', include(router.urls)),
+]
