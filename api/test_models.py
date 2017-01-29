@@ -6,7 +6,9 @@ from api.models import Haus, UAC, Device, Sensor
 User = get_user_model()
 
 
-# Create your tests here.
+# These are quite possibly, the worst tests I've ever passed my
+# unsuspecting eyes upon. If people thought tests were hard, they haven't
+# seen someone attempt to write these.
 class StringConversionTests(TestCase):
     @classmethod
     def setUpTestData(cls):
