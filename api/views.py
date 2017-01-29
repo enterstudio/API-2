@@ -62,7 +62,7 @@ class DeviceSerializer(serializers.ModelSerializer):
 class SensorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sensor
-        fields = ('device', 'name', '_category', 'last_datum')
+        fields = ('id', 'device', 'name', '_category', 'last_datum')
 
 
 class UACSerializer(serializers.ModelSerializer):
@@ -103,15 +103,10 @@ class DeviceList(generics.ListCreateAPIView):
     permission_classes = (UnlimitedAccess,)
 
 
-class DeviceDetailByUUID(generics.ListAPIView):
+class DeviceDetailByUUID(generics.RetrieveUpdateDestroyAPIView):
     queryset = Device.objects.all()
     serializer_class = DeviceSerializer
     permission_classes = (UnlimitedAccess,)
-    lookup_field = 'uuid'
-
-    def get_queryset(self):
-        queryset = super(DeviceDetailByUUID, self).get_queryset()
-        return queryset.filter(uuid=self.kwargs.get('uuid'))
 
 
 class DeviceDetailByHaus(generics.ListAPIView):
@@ -142,6 +137,12 @@ class SensorDetailByDevice(generics.ListAPIView):
         return queryset.filter(device=self.kwargs.get('device'))
 
 
+class SensorById(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Sensor.objects.all()
+    serializer_class = SensorSerializer
+    permission_classes = (UnlimitedAccess,)
+
+
 class UACList(generics.ListCreateAPIView):
     queryset = UAC.objects.all()
     serializer_class = UACSerializer
@@ -162,11 +163,13 @@ urlpatterns = [
     url(r'^haus/$', HausList.as_view()),
     url(r'^haus/(?P<pk>[0-9]+)/$', HausDetail.as_view()),
     url(r'^device/$', DeviceList.as_view()),
-    url(r'^device/uuid/(?P<uuid>[a-z0-9\-]+)/$', DeviceDetailByUUID.as_view()),
-    url(r'^device/haus/(?P<haus>[0-9\-]+)/$', DeviceDetailByHaus.as_view()),
+    url(r'^device/(?P<pk>[a-z0-9\-]+)/$', DeviceDetailByUUID.as_view()),
+    url(r'^device/list/haus/(?P<haus>[0-9\-]+)/$',
+        DeviceDetailByHaus.as_view()),
     url(r'^sensor/$', SensorList.as_view()),
-    url(r'^sensor/device/(?P<device>[a-z0-9\-]+)/$',
+    url(r'^sensor/list/device/(?P<device>[a-z0-9\-]+)/$',
         SensorDetailByDevice.as_view()),
+    url(r'^sensor/(?P<pk>[0-9\-]+)/$', SensorById.as_view()),
     url(r'^uac/$', UACList.as_view()),
     url(r'^uac/(?P<pk>[0-9]+)/$', UACDetail.as_view()),
 ]
