@@ -27,22 +27,20 @@ class JSONResponse(HttpResponse):
 
 # Permission classes
 
-class IsOwnerOrReadOnly(permissions.BasePermission):
-    """
-    Custom permission to only allow owners of an object to edit it.
-    """
-
+class HausAccess(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        # Read permissions are allowed to any request,
-        # so we'll always allow GET, HEAD or OPTIONS requests.
-        if request.method in permissions.SAFE_METHODS:
-            return True
-
-        # Write permissions are only allowed to the owner of the snippet.
-        return obj.owner == request.user
+        return request.user in obj.users.all()
 
 
-# Serializers
+class DeviceAccess(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return request.user in obj.haus.users.all()
+
+
+class SensorAccess(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return request.user in obj.device.haus.users.all()
+
 
 class HausSerializer(serializers.ModelSerializer):
     class Meta:
@@ -59,13 +57,13 @@ class DeviceSerializer(serializers.ModelSerializer):
 class SensorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sensor
-        fields = ('device', 'name', 'category', 'last_datum')
+        fields = ('device', 'name', '_category', 'last_datum')
 
 
 class UACSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Sensor
-        fields = ('user', 'haus', 'level')
+        model = UAC
+        fields = ('user', 'haus', '_level')
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -79,56 +77,55 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    permission_classes = (permissions.IsAdminUser,)
 
 
 class HausList(generics.ListCreateAPIView):
     queryset = Haus.objects.all()
     serializer_class = HausSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (permissions.IsAdminUser,)
 
 
 class HausDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Haus.objects.all()
     serializer_class = HausSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (HausAccess,)
 
 
 class DeviceList(generics.ListCreateAPIView):
     queryset = Device.objects.all()
     serializer_class = DeviceSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (permissions.IsAdminUser,)
 
 
 class DeviceDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Device.objects.all()
     serializer_class = DeviceSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,
-                          IsOwnerOrReadOnly)
+    permission_classes = (DeviceAccess,)
 
 
 class SensorList(generics.ListCreateAPIView):
     queryset = Sensor.objects.all()
     serializer_class = SensorSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (permissions.IsAdminUser,)
 
 
 class SensorDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Sensor.objects.all()
     serializer_class = SensorSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,
-                          IsOwnerOrReadOnly)
+    permission_classes = (SensorAccess,)
 
 
 class UACList(generics.ListCreateAPIView):
     queryset = UAC.objects.all()
     serializer_class = UACSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (permissions.IsAdminUser,)
 
 
 class UACDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = UAC.objects.all()
     serializer_class = UACSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (permissions.IsAdminUser,)
 
 
 router = routers.DefaultRouter()
@@ -139,7 +136,7 @@ urlpatterns = [
     url(r'^haus/$', HausList.as_view()),
     url(r'^haus/(?P<pk>[0-9]+)/$', HausDetail.as_view()),
     url(r'^device/$', DeviceList.as_view()),
-    url(r'^device/(?P<pk>[0-9]+)/$', DeviceDetail.as_view()),
+    url(r'^device/(?P<pk>[a-z0-9\-]+)/$', DeviceDetail.as_view()),
     url(r'^sensor/$', SensorList.as_view()),
     url(r'^sensor/(?P<pk>[0-9]+)/$', SensorDetail.as_view()),
     url(r'^uac/$', UACList.as_view()),
