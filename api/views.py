@@ -42,6 +42,11 @@ class SensorAccess(permissions.BasePermission):
         return request.user in obj.device.haus.users.all()
 
 
+class UnlimitedAccess(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return True
+
+
 class HausSerializer(serializers.ModelSerializer):
     class Meta:
         model = Haus
@@ -77,55 +82,76 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (permissions.IsAdminUser,)
+    permission_classes = (UnlimitedAccess,)
 
 
 class HausList(generics.ListCreateAPIView):
     queryset = Haus.objects.all()
     serializer_class = HausSerializer
-    permission_classes = (permissions.IsAdminUser,)
+    permission_classes = (UnlimitedAccess,)
 
 
 class HausDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Haus.objects.all()
     serializer_class = HausSerializer
-    permission_classes = (HausAccess,)
+    permission_classes = (UnlimitedAccess,)
 
 
 class DeviceList(generics.ListCreateAPIView):
     queryset = Device.objects.all()
     serializer_class = DeviceSerializer
-    permission_classes = (permissions.IsAdminUser,)
+    permission_classes = (UnlimitedAccess,)
 
 
-class DeviceDetail(generics.RetrieveUpdateDestroyAPIView):
+class DeviceDetailByUUID(generics.ListAPIView):
     queryset = Device.objects.all()
     serializer_class = DeviceSerializer
-    permission_classes = (DeviceAccess,)
+    permission_classes = (UnlimitedAccess,)
+    lookup_field = 'uuid'
+
+    def get_queryset(self):
+        queryset = super(DeviceDetailByUUID, self).get_queryset()
+        return queryset.filter(uuid=self.kwargs.get('uuid'))
+
+
+class DeviceDetailByHaus(generics.ListAPIView):
+    queryset = Device.objects.all()
+    serializer_class = DeviceSerializer
+    permission_classes = (UnlimitedAccess,)
+    lookup_field = 'haus'
+
+    def get_queryset(self):
+        queryset = super(DeviceDetailByHaus, self).get_queryset()
+        return queryset.filter(haus=self.kwargs.get('haus'))
 
 
 class SensorList(generics.ListCreateAPIView):
     queryset = Sensor.objects.all()
     serializer_class = SensorSerializer
-    permission_classes = (permissions.IsAdminUser,)
+    permission_classes = (UnlimitedAccess,)
 
 
-class SensorDetail(generics.RetrieveUpdateDestroyAPIView):
+class SensorDetailByDevice(generics.ListAPIView):
     queryset = Sensor.objects.all()
     serializer_class = SensorSerializer
-    permission_classes = (SensorAccess,)
+    permission_classes = (UnlimitedAccess,)
+    lookup_field = 'device'
+
+    def get_queryset(self):
+        queryset = super(SensorDetailByDevice, self).get_queryset()
+        return queryset.filter(device=self.kwargs.get('device'))
 
 
 class UACList(generics.ListCreateAPIView):
     queryset = UAC.objects.all()
     serializer_class = UACSerializer
-    permission_classes = (permissions.IsAdminUser,)
+    permission_classes = (UnlimitedAccess,)
 
 
 class UACDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = UAC.objects.all()
     serializer_class = UACSerializer
-    permission_classes = (permissions.IsAdminUser,)
+    permission_classes = (UnlimitedAccess,)
 
 
 router = routers.DefaultRouter()
@@ -136,13 +162,15 @@ urlpatterns = [
     url(r'^haus/$', HausList.as_view()),
     url(r'^haus/(?P<pk>[0-9]+)/$', HausDetail.as_view()),
     url(r'^device/$', DeviceList.as_view()),
-    url(r'^device/(?P<pk>[a-z0-9\-]+)/$', DeviceDetail.as_view()),
+    url(r'^device/uuid/(?P<uuid>[a-z0-9\-]+)/$', DeviceDetailByUUID.as_view()),
+    url(r'^device/haus/(?P<haus>[0-9\-]+)/$', DeviceDetailByHaus.as_view()),
     url(r'^sensor/$', SensorList.as_view()),
-    url(r'^sensor/(?P<pk>[0-9]+)/$', SensorDetail.as_view()),
+    url(r'^sensor/device/(?P<device>[a-z0-9\-]+)/$',
+        SensorDetailByDevice.as_view()),
     url(r'^uac/$', UACList.as_view()),
     url(r'^uac/(?P<pk>[0-9]+)/$', UACDetail.as_view()),
 ]
 
-urlpatterns = format_suffix_patterns(urlpatterns)
+# urlpatterns = format_suffix_patterns(urlpatterns)
 
 urlpatterns += [url(r'^', include(router.urls))]
