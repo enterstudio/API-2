@@ -1,5 +1,6 @@
 django
 django-allauth
 djangorestframework
+django-cors-headers
 
 pep8
