@@ -1,21 +1,21 @@
 from django.conf.urls import url, include
 
 from .views import HausList, HausDetail
-from .views import DeviceList, DeviceDetailByUUID, DeviceDetailByHaus
-from .views import SensorList, SensorDetailByDevice, SensorById
+from .views import DeviceList, DeviceDetailByUUID, DeviceListByHaus
+from .views import SensorList, SensorListByDevice, SensorById
 from .views import UACList, UACDetail
 
 
 haus_urls = [
     url(r'^$', HausList.as_view()),
     url(r'^(?P<pk>[0-9]+)$', HausDetail.as_view()),
-    url(r'^(?P<haus>[0-9]+)/devices$', DeviceDetailByHaus.as_view()),
+    url(r'^(?P<haus>[0-9]+)/devices$', DeviceListByHaus.as_view()),
 ]
 
 device_urls = [
     url(r'^$', DeviceList.as_view()),
     url(r'^(?P<uuid>[a-z0-9\-]+)$', DeviceDetailByUUID.as_view()),
-    url(r'^(?P<device>[a-z0-9\-]+)/sensors$', SensorDetailByDevice.as_view()),
+    url(r'^(?P<device>[a-z0-9\-]+)/sensors$', SensorListByDevice.as_view()),
 ]
 
 sensor_urls = [

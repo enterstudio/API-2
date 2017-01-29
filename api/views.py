@@ -53,14 +53,14 @@ class DeviceDetailByUUID(generics.RetrieveUpdateDestroyAPIView):
     lookup_field = 'uuid'
 
 
-class DeviceDetailByHaus(generics.ListAPIView):
+class DeviceListByHaus(generics.ListAPIView):
     queryset = Device.objects.all()
     serializer_class = DeviceSerializer
     permission_classes = (UnlimitedAccess,)
     lookup_field = 'haus'
 
     def get_queryset(self):
-        queryset = super(DeviceDetailByHaus, self).get_queryset()
+        queryset = super(DeviceListByHaus, self).get_queryset()
         return queryset.filter(haus=self.kwargs.get('haus'))
 
 
@@ -70,14 +70,14 @@ class SensorList(generics.ListCreateAPIView):
     permission_classes = (UnlimitedAccess,)
 
 
-class SensorDetailByDevice(generics.ListAPIView):
+class SensorListByDevice(generics.ListAPIView):
     queryset = Sensor.objects.all()
     serializer_class = SensorSerializer
     permission_classes = (UnlimitedAccess,)
     lookup_field = 'device'
 
     def get_queryset(self):
-        queryset = super(SensorDetailByDevice, self).get_queryset()
+        queryset = super(SensorListByDevice, self).get_queryset()
         return queryset.filter(device=self.kwargs.get('device'))
 
 
