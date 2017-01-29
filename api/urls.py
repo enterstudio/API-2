@@ -1,0 +1,37 @@
+from django.conf.urls import url, include
+
+from .views import HausList, HausDetail
+from .views import DeviceList, DeviceDetailByUUID, DeviceDetailByHaus
+from .views import SensorList, SensorDetailByDevice, SensorById
+from .views import UACList, UACDetail
+
+
+haus_urls = [
+    url(r'^$', HausList.as_view()),
+    url(r'^(?P<pk>[0-9]+)$', HausDetail.as_view()),
+    url(r'^(?P<haus>[0-9]+)/devices$', DeviceDetailByHaus.as_view()),
+]
+
+device_urls = [
+    url(r'^$', DeviceList.as_view()),
+    url(r'^(?P<uuid>[a-z0-9\-]+)$', DeviceDetailByUUID.as_view()),
+    url(r'^(?P<device>[a-z0-9\-]+)/sensors$', SensorDetailByDevice.as_view()),
+]
+
+sensor_urls = [
+    url(r'^$', SensorList.as_view()),
+    url(r'^(?P<pk>[0-9\-]+)/$', SensorById.as_view()),
+]
+
+uac_urls = [
+    url(r'^$', UACList.as_view()),
+    url(r'^(?P<pk>[0-9]+)/$', UACDetail.as_view()),
+]
+
+urlpatterns = [
+    url(r'^haus/', include(haus_urls)),
+    url(r'^device/', include(device_urls)),
+    url(r'^sensor/', include(sensor_urls)),
+    url(r'^uac/', include(uac_urls)),
+    url(r'^', include(haus_urls))
+]

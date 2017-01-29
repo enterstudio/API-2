@@ -1,6 +1,5 @@
 from django.conf.urls import url, include
 from django.contrib import admin
-from api.views import router
 import api
 
 
@@ -11,4 +10,5 @@ urlpatterns = [
     url(r'^api-auth/', include('rest_framework.urls',
                                namespace='rest_framework')),
     url(r'^accounts/', include('allauth.urls')),
-] + api.views.urlpatterns
+    url(r'^', include('api.urls'))
+]
