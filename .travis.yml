@@ -11,3 +11,5 @@ install:
 # command to run tests
 script: ./test.sh
 
+notifications:
+  slack: lazyhaus:JKzP250UizSzSpDDtgEOr31B
