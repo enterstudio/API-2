@@ -18,10 +18,11 @@ SITE_ID = 1
 # See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
+# This secret key is only here as an example
 SECRET_KEY = 'b^(93godjczln9v(6fc0t5xdysu0#sfmn1nazal&^$^46w5fox'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = []
 
@@ -136,3 +137,8 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 CORS_ORIGIN_ALLOW_ALL = True
+
+try:
+    from .local_settings import *
+except ImportError:
+    pass
