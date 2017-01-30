@@ -5,17 +5,17 @@ from rest_framework import permissions
 
 class HausAccess(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        return request.user in obj.users.all()
+        return obj.users.filter(user=request.user).exists()
 
 
 class DeviceAccess(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        return request.user in obj.haus.users.all()
+        return obj.users.filter(user=request.user).exists()
 
 
 class SensorAccess(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        return request.user in obj.device.haus.users.all()
+        return obj.users.filter(user=request.user).exists()
 
 
 class UnlimitedAccess(permissions.BasePermission):
