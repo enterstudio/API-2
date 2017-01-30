@@ -12,4 +12,4 @@ install:
 script: ./test.sh
 
 notifications:
-  slack: lazyhaus:JKzP250UizSzSpDDtgEOr31B
+  slack: lazyhaus:JKzP250UizSzSpDDtgEOr31B#api
