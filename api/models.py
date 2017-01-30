@@ -66,6 +66,9 @@ class Haus(models.Model):
     def __repr__(self):
         return "<Haus: {0.name!r}, {0.owner!r}>".format(self)
 
+    class Meta:
+        verbose_name_plural = u"H\xe4user"
+
 
 class UAC(models.Model):
     LEVELS = LazyEnum("Owner", "Admin", "Resident", "Landlord", "Guest")
@@ -84,6 +87,9 @@ class UAC(models.Model):
 
     def __repr__(self):
         return "<UAC: {0.user!r}, {0.haus!r}, {0.level!r}>".format(self)
+
+    class Meta:
+        verbose_name = "User Access Control"
 
 
 class Device(models.Model):
