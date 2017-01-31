@@ -14,6 +14,11 @@ def create_user(username, email, pw, is_staff):
     return user
 
 
+def create_haus(name, owner):
+    haus = Haus.objects.create_haus(name=name, owner=owner)
+    return haus
+
+
 class HausTests(APITestCase):
     def test_create_haus(self):
         """
@@ -21,7 +26,6 @@ class HausTests(APITestCase):
         """
         url = reverse('haus-main')
         admin = create_user('god', 'got@heav.en', 'pass', True)
-        user = create_user('peasant', 'pesant@ear.th', 'pass', False)
         data = {
             'name': 'TestysHaus',
             'owner': admin.id,
@@ -37,3 +41,4 @@ class HausTests(APITestCase):
         idx = self.test_create_haus()
         url = reverse('haus-detail', args=[idx])
         response = self.client.get(url, {}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)

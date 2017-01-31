@@ -1,4 +1,3 @@
-from django.contrib.auth.models import User
 from django.http import HttpResponse
 from rest_framework.renderers import JSONRenderer
 from rest_framework import viewsets, routers
