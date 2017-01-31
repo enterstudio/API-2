@@ -16,10 +16,10 @@ class StringConversionTests(TestCase):
         User.objects.create(username="user")
         Haus(name="haus", owner=User.objects.first()).save()
         UAC(haus=Haus.objects.first(), user=User.objects.first(),
-            _level=UAC.LEVELS.OWNER).save()
+            level=UAC.LEVELS.OWNER).save()
         Device(name="device", haus=Haus.objects.first()).save()
         Sensor(name="sensor", device=Device.objects.first(),
-               _category=Sensor.CATEGORIES.PIR).save()
+               category=Sensor.CATEGORIES.PIR).save()
 
     def test_haus(self):
         haus = Haus.objects.first()

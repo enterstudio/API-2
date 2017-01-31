@@ -18,13 +18,13 @@ class DeviceSerializer(serializers.ModelSerializer):
 class SensorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sensor
-        fields = ('id', 'device', 'name', '_category', 'last_datum')
+        fields = ('id', 'device', 'name', 'category', 'last_datum')
 
 
 class UACSerializer(serializers.ModelSerializer):
     class Meta:
         model = UAC
-        fields = ('user', 'haus', '_level')
+        fields = ('user', 'haus', 'level')
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
