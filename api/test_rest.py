@@ -41,4 +41,4 @@ class HausTests(APITestCase):
         idx = self.test_create_haus()
         url = reverse('haus-detail', args=[idx])
         response = self.client.get(url, {}, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
