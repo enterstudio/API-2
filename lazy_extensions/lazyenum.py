@@ -1,4 +1,8 @@
+import json
+
 from django.db.models import PositiveSmallIntegerField
+
+from rest_framework.fields import Field
 
 
 class LazyEnum(object):
@@ -25,6 +29,9 @@ class LazyEnum(object):
 
         def __repr__(self):
             return "<Value: {0.name!r}, {0.value!r}>".format(self)
+
+        def __hash__(self):
+            return hash((self.name, self.value))
 
     def __init__(self, *values, **kwargs):
         super(LazyEnum, self).__init__(**kwargs)
@@ -68,3 +75,12 @@ class LazyEnumField(PositiveSmallIntegerField):
             return options[0]
 
         return None
+
+
+class LazyEnumEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, LazyEnum.Value):
+            return tuple(obj)
+        return super(LazyEnumEncoder, self).default(obj)
+
+json.JSONEncoder = LazyEnumEncoder
