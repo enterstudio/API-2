@@ -1,3 +1,6 @@
+import string
+import random
+
 import uuid
 
 from django.db import models
@@ -10,6 +13,15 @@ class LazyEnum(object):
             super(LazyEnum.Value, self).__init__(*args, **kwargs)
             self.value = value
             self.name = name
+
+        def __eq__(self, other):
+            return other in [
+                (self.value, self.name),
+                (self.name, self.value),
+                self.value,
+                self.name,
+                self.name.upper(),
+            ]
 
         def __len__(self):
             return 2
@@ -50,15 +62,22 @@ class LazyEnum(object):
         return self.values[idx]
 
     def __repr__(self):
-        return "LazyEnum({})".format(", ".join(repr(enumerate(self.values))))
+        return "<LazyEnum: {}>".format(", ".join(repr(x) for x in self.values))
 
 
-# Create your models here.
+class HausManager(models.Manager):
+    def create_haus(self, name, owner):
+        haus = self.create(name=name, owner=owner)
+        return haus
+
+
 class Haus(models.Model):
     name = models.CharField(max_length=200)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL,
                               related_name="owned_hauses")
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, through="UAC")
+
+    objects = HausManager()
 
     def __str__(self):
         return "{0.name}, owned by {0.owner!s}".format(self)
@@ -70,12 +89,20 @@ class Haus(models.Model):
         verbose_name_plural = u"H\xe4user"
 
 
+class UACManager(models.Manager):
+    def create_uac(self, user, haus):
+        uac = self.create(user=user, haus=haus)
+        return uac
+
+
 class UAC(models.Model):
     LEVELS = LazyEnum("Owner", "Admin", "Resident", "Landlord", "Guest")
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
     haus = models.ForeignKey(Haus)
     _level = models.PositiveSmallIntegerField(choices=LEVELS)
+
+    objects = UACManager()
 
     @property
     def level(self):
@@ -93,6 +120,15 @@ class UAC(models.Model):
         unique_together = (('user', 'haus', ), )
 
 
+class DeviceManager(models.Manager):
+    def create_device(self, name, haus=None, last_ping=None):
+        secret = ''.join(random.choice(string.ascii_uppercase + string.digits)
+                         for _ in range(N))
+        device = self.create(name=name, haus=haus, last_ping=last_ping,
+                             setup_secret=secret)
+        return device
+
+
 class Device(models.Model):
     uuid = models.UUIDField(primary_key=True, editable=False,
                             default=uuid.uuid4)
@@ -101,11 +137,21 @@ class Device(models.Model):
     haus = models.ForeignKey(Haus, blank=True, null=True)
     setup_secret = models.CharField(max_length=256)
 
+    objects = DeviceManager()
+
     def __str__(self):
         return "{0.name}".format(self)
 
     def __repr__(self):
         return "<Device: {0.name!r}, {0.haus!r}>".format(self)
+
+
+class SensorManager(models.Manager):
+    def create_sensor(self, devic, name, category, last_datum=0, formatter=''):
+        sensor = self.create(device=devic, name=name, _category=category,
+                             last_datum=last_datum, formatter=formatter)
+        # TODO filestore
+        return sensor
 
 
 class Sensor(models.Model):
@@ -127,9 +173,11 @@ class Sensor(models.Model):
     formatter = models.TextField()
     file_store = models.FileField(blank=True, null=True)
 
+    objects = SensorManager()
+
     @property
     def category(self):
-        return Sensor.CATEGORIES.from_id(_category)
+        return Sensor.CATEGORIES.from_id(self._category)
 
     def __str__(self):
         return "{0.name}".format(self)

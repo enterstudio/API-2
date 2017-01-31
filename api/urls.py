@@ -7,8 +7,8 @@ from .views import UACList, UACDetail
 
 
 haus_urls = [
-    url(r'^$', HausList.as_view()),
-    url(r'^(?P<pk>[0-9]+)$', HausDetail.as_view()),
+    url(r'^$', HausList.as_view(), name='haus-main'),
+    url(r'^(?P<pk>[0-9]+)$', HausDetail.as_view(), name='haus-detail'),
     url(r'^(?P<haus>[0-9]+)/devices$', DeviceListByHaus.as_view()),
 ]
 

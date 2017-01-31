@@ -1,9 +1,9 @@
-from django.contrib.auth.models import User
 from django.http import HttpResponse
 from rest_framework.renderers import JSONRenderer
 from rest_framework import viewsets, routers
 from rest_framework import generics
 from rest_framework.urlpatterns import format_suffix_patterns
+from rest_framework.permissions import IsAdminUser
 
 from .models import Haus, Device, Sensor, UAC
 from .access import UnlimitedAccess
@@ -22,16 +22,10 @@ class JSONResponse(HttpResponse):
         super(JSONResponse, self).__init__(content, **kwargs)
 
 
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = (UnlimitedAccess,)
-
-
 class HausList(generics.ListCreateAPIView):
     queryset = Haus.objects.all()
     serializer_class = HausSerializer
-    permission_classes = (UnlimitedAccess,)
+    permission_classes = (IsAdminUser,)
 
 
 class HausDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -43,7 +37,7 @@ class HausDetail(generics.RetrieveUpdateDestroyAPIView):
 class DeviceList(generics.ListCreateAPIView):
     queryset = Device.objects.all()
     serializer_class = DeviceSerializer
-    permission_classes = (UnlimitedAccess,)
+    permission_classes = (IsAdminUser,)
 
 
 class DeviceDetailByUUID(generics.RetrieveUpdateDestroyAPIView):
@@ -67,7 +61,7 @@ class DeviceListByHaus(generics.ListAPIView):
 class SensorList(generics.ListCreateAPIView):
     queryset = Sensor.objects.all()
     serializer_class = SensorSerializer
-    permission_classes = (UnlimitedAccess,)
+    permission_classes = (IsAdminUser,)
 
 
 class SensorListByDevice(generics.ListAPIView):
@@ -90,7 +84,7 @@ class SensorById(generics.RetrieveUpdateDestroyAPIView):
 class UACList(generics.ListCreateAPIView):
     queryset = UAC.objects.all()
     serializer_class = UACSerializer
-    permission_classes = (UnlimitedAccess,)
+    permission_classes = (IsAdminUser,)
 
 
 class UACDetail(generics.RetrieveUpdateDestroyAPIView):
