@@ -35,7 +35,7 @@ class Haus(models.Model):
 
 class UACManager(models.Manager):
     def create_uac(self, user, haus, level=4):
-        uac = self.create(user=user, haus=haus, _level=level)
+        uac = self.create(user=user, haus=haus, level=level)
         return uac
 
 
@@ -45,6 +45,8 @@ class UAC(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
     haus = models.ForeignKey(Haus)
     level = LazyEnumField(choices=LEVELS)
+
+    objects = UACManager()
 
     def __str__(self):
         return ("Permission of {0.user!s} in the Haus {0.haus!s}:" +
@@ -61,7 +63,7 @@ class UAC(models.Model):
 class DeviceManager(models.Manager):
     def create_device(self, name, haus=None, last_ping=None):
         secret = ''.join(random.choice(string.ascii_uppercase + string.digits)
-                         for _ in range(N))
+                         for _ in range(256))
         device = self.create(name=name, haus=haus, last_ping=last_ping,
                              setup_secret=secret)
         return device
@@ -86,7 +88,7 @@ class Device(models.Model):
 
 class SensorManager(models.Manager):
     def create_sensor(self, devic, name, category, last_datum=0, formatter=''):
-        sensor = self.create(device=devic, name=name, _category=category,
+        sensor = self.create(device=devic, name=name, category=category,
                              last_datum=last_datum, formatter=formatter)
         # TODO filestore
         return sensor

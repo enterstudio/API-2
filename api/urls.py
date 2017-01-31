@@ -14,13 +14,14 @@ haus_urls = [
 
 device_urls = [
     url(r'^$', DeviceList.as_view(), name='device-lcdapi'),
-    url(r'^(?P<uuid>[a-z0-9\-]+)$', DeviceDetailByUUID.as_view()),
+    url(r'^(?P<uuid>[a-z0-9\-]+)$', DeviceDetailByUUID.as_view(),
+        name='device-detail'),
     url(r'^(?P<device>[a-z0-9\-]+)/sensors$', SensorListByDevice.as_view()),
 ]
 
 sensor_urls = [
     url(r'^$', SensorList.as_view(), name='sensor-lcdapi'),
-    url(r'^(?P<pk>[0-9\-]+)/$', SensorById.as_view()),
+    url(r'^(?P<pk>[0-9\-]+)/$', SensorById.as_view(), name='sensor-detail'),
 ]
 
 uac_urls = [

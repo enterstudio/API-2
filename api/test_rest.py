@@ -14,11 +14,6 @@ def create_user(username, email, pw, is_staff):
     return user
 
 
-def create_haus(name, owner):
-    haus = Haus.objects.create_haus(name=name, owner=owner)
-    return haus
-
-
 def assert_get(obj, urls, assert_status):
     for url in urls:
         response = obj.client.get(url, {}, format='json')
@@ -65,16 +60,41 @@ class PermissionTests(APITestCase):
     def test_haus_permissions(self):
         admin, user = create_admin_and_user()
 
-        haus = create_haus("Bojangle's Crib", admin)
+        haus = Haus.objects.create_haus(name="Bojangle's Crib", owner=admin)
         url = reverse('haus-detail', args=[haus.id])
 
         self.client.login(username='straycat', password='pass')
         response = self.client.get(url, {}, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-        UAC.objects.create_uac(user=user, haus=haus, level=0).save()
+        UAC.objects.create_uac(user, haus, 0)
 
         # Now user should have permission to view the haus
         response = self.client.get(url, {}, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.client.logout()
+        return admin, haus
+
+    def test_device_permissions(self):
+        # This one may require rewriting later
+        admin, haus = self.test_haus_permissions()
+        superd = Device.objects.create_device(name="SuperDevice", haus=haus)
+        empty = Haus.objects.create_haus(name="Empty Crib", owner=admin)
+        nohausd = Device.objects.create_device(name="NoHausDevice", haus=empty)
+        url = reverse('device-detail', args=[superd.uuid])
+        response = self.client.get(url, {}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        url = reverse('device-detail', args=[nohausd.uuid])
+        response = self.client.get(url, {}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        return superd, nohausd
+
+    def test_sensor_permissions(self):
+        superd, nohausd = self.test_device_permissions()
+        sensor = Sensor.objects.create_sensor(superd, "1", 0)
+        sensor_403 = Sensor.objects.create_sensor(nohausd, "2", 0)
+        url = reverse('sensor-detail', args=[sensor.id])
+        response = self.client.get(url, {}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        url = reverse('sensor-detail', args=[sensor_403.id])
+        response = self.client.get(url, {}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
