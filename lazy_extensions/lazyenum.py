@@ -2,11 +2,11 @@ from django.db.models import PositiveSmallIntegerField
 
 
 class LazyEnum(object):
-    class Value(object):
-        def __init__(self, value, name, *args, **kwargs):
-            super(LazyEnum.Value, self).__init__(*args, **kwargs)
-            self.value = value
-            self.name = name
+    class Value(tuple):
+        def __init__(self, tup):
+            super(LazyEnum.Value, self).__init__()
+            self.value = tup[0]
+            self.name = tup[1]
 
         def __eq__(self, other):
             return other in [
@@ -16,15 +16,6 @@ class LazyEnum(object):
                 self.name,
                 self.name.upper(),
             ]
-
-        def __len__(self):
-            return 2
-
-        def __getitem__(self, key):
-            return (self.value, self.name)[key]
-
-        def __iter__(self):
-            return iter((self.value, self.name))
 
         def __int__(self):
             return self.value
@@ -38,7 +29,7 @@ class LazyEnum(object):
     def __init__(self, *values, **kwargs):
         super(LazyEnum, self).__init__(**kwargs)
         self.values = tuple(
-            LazyEnum.Value(i, name) for i, name in enumerate(values)
+            LazyEnum.Value((i, name)) for i, name in enumerate(values)
         )
         for value in self.values:
             setattr(self, str(value).upper(), value)
