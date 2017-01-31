@@ -20,11 +20,13 @@ class HausTests(APITestCase):
         Ensure we can create a new account object.
         """
         url = reverse('haus-main')
-        user = create_user('god', 'got@heav.en', 'pass', True)
+        admin = create_user('god', 'got@heav.en', 'pass', True)
+        user = create_user('peasant', 'pesant@ear.th', 'pass', False)
         data = {
             'name': 'TestysHaus',
-            'owner': user.id,
+            'owner': admin.id,
         }
+        self.client.login(username='god', password='pass')
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Haus.objects.count(), 1)
@@ -35,4 +37,3 @@ class HausTests(APITestCase):
         idx = self.test_create_haus()
         url = reverse('haus-detail', args=[idx])
         response = self.client.get(url, {}, format='json')
-        print(response)
