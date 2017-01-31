@@ -4,3 +4,4 @@ djangorestframework
 django-cors-headers
 
 pep8
+python-coveralls
