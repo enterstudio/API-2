@@ -51,3 +51,4 @@ class StringConversionTests(TestCase):
                          " <Haus: {!r}, <User: user>>>>").format(u"sensor",
                                                                  u"device",
                                                                  u"haus"))
+        self.assertEqual(sensor.category, ("PIR", 2))

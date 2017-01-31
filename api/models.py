@@ -11,6 +11,15 @@ class LazyEnum(object):
             self.value = value
             self.name = name
 
+        def __eq__(self, other):
+            return other in [
+                (self.value, self.name),
+                (self.name, self.value),
+                self.value,
+                self.name,
+                self.name.upper(),
+            ]
+
         def __len__(self):
             return 2
 
@@ -50,7 +59,7 @@ class LazyEnum(object):
         return self.values[idx]
 
     def __repr__(self):
-        return "LazyEnum({})".format(", ".join(repr(enumerate(self.values))))
+        return "<LazyEnum: {}>".format(", ".join(repr(x) for x in self.values))
 
 
 # Create your models here.
@@ -129,7 +138,7 @@ class Sensor(models.Model):
 
     @property
     def category(self):
-        return Sensor.CATEGORIES.from_id(_category)
+        return Sensor.CATEGORIES.from_id(self._category)
 
     def __str__(self):
         return "{0.name}".format(self)
