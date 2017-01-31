@@ -90,6 +90,7 @@ class UAC(models.Model):
 
     class Meta:
         verbose_name = "User Access Control"
+        unique_together = (('user', 'haus', ), )
 
 
 class Device(models.Model):
