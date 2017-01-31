@@ -34,8 +34,8 @@ class Haus(models.Model):
 
 
 class UACManager(models.Manager):
-    def create_uac(self, user, haus):
-        uac = self.create(user=user, haus=haus)
+    def create_uac(self, user, haus, level=4):
+        uac = self.create(user=user, haus=haus, _level=level)
         return uac
 
 
