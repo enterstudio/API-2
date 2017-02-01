@@ -3,7 +3,7 @@ import json
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 
-from .lazyenum import LazyEnum, LazyEnumField
+from .lazyenum import LazyEnum, LazyEnumField, LazyEnumEncoder
 
 User = get_user_model()
 
@@ -38,8 +38,8 @@ class StringConversionTests(TestCase):
     def test_lazyenumfield_conversions(self):
         enum = LazyEnum("a", "b", "c")
         field = LazyEnumField(enum)
-        for i in range(len(enum)):
-            self.assertEqual(field.from_db_value(i, None, None, None), enum[i])
+        for i, v in enumerate(enum):
+            self.assertEqual(field.from_db_value(i, None, None, None), v)
         for v in enum:
             self.assertEqual(v, field.to_python(v))
             self.assertEqual(v, field.to_python(tuple(v)))
@@ -50,3 +50,8 @@ class StringConversionTests(TestCase):
         enum = LazyEnum("a", "b", "c")
         self.assertEqual(json.dumps(enum[0]), json.dumps((0, "a")))
         self.assertRaises(TypeError, lambda: json.dumps(enum))
+
+        self.assertEqual(LazyEnumEncoder(None, enum[0]), (0, "a"))
+        self.assertRaises(TypeError, lambda: LazyEnumEncoder(None, enum))
+
+        self.assertEqual({enum[0]: 0}, {("a", 0): 0})
