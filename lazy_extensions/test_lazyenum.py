@@ -49,3 +49,4 @@ class StringConversionTests(TestCase):
     def test_lazyenum_json(self):
         enum = LazyEnum("a", "b", "c")
         self.assertEqual(json.dumps(enum[0]), json.dumps((0, "a")))
+        self.assertRaises(TypeError, lambda: json.dumps(enum))
