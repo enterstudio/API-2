@@ -89,6 +89,7 @@ INSTALLED_APPS = (
 
     # local modules
     'api',
+    'clients',
 )
 
 MIDDLEWARE_CLASSES = (
