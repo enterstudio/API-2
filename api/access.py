@@ -1,4 +1,5 @@
 from rest_framework import permissions
+from .models import Device, Sensor, Haus
 
 # Permission classes
 
@@ -14,7 +15,6 @@ class LCAPIPermission(permissions.BasePermission):
         if request.method == 'GET':
             # Only staff can get an entire list
             return request.user.is_staff
-        return False
 
 # The rest of these permissions should be updated appropriately
 # when further specification of permissions on sensors are described
@@ -22,20 +22,32 @@ class LCAPIPermission(permissions.BasePermission):
 
 
 class HausPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        haus = Haus.objects.get(id=view.kwargs.get(view.lookup_field))
+        return haus.users.filter(id=request.user.id).exists()
+
     def has_object_permission(self, request, view, obj):
         return obj.users.filter(id=request.user.id).exists()
 
 
 class DevicePermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        device = Device.objects.get(uuid=view.kwargs.get(view.lookup_field))
+        return device.haus.users.filter(id=request.user.id).exists()
+
     def has_object_permission(self, request, view, obj):
         return obj.haus.users.filter(id=request.user.id).exists()
 
 
 class SensorPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        sensor = Sensor.objects.get(id=view.kwargs.get(view.lookup_field))
+        return sensor.device.haus.users.filter(id=request.user.id).exists()
+
     def has_object_permission(self, request, view, obj):
         return obj.device.haus.users.filter(id=request.user.id).exists()
 
 
-class UnlimitedPermission(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
-        return True
+# class UnlimitedPermission(permissions.BasePermission):
+#     def has_object_permission(self, request, view, obj):
+#         return True
