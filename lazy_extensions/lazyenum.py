@@ -74,13 +74,10 @@ class LazyEnumField(PositiveSmallIntegerField):
 
         return None
 
-_encoder = json.JSONEncoder
 
+def LazyEnumEncoder(self, obj):
+    if isinstance(obj, LazyEnum.Value):
+        return tuple(obj)
+    return super(LazyEnumEncoder, self).default(obj)
 
-class LazyEnumEncoder(_encoder):
-    def default(self, obj):
-        if isinstance(obj, LazyEnum.Value):
-            return tuple(obj)
-        return super(LazyEnumEncoder, self).default(obj)
-
-json.JSONEncoder = LazyEnumEncoder
+json.JSONEncoder.default = LazyEnumEncoder
