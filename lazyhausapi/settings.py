@@ -78,11 +78,11 @@ INSTALLED_APPS = (
     'allauth.account',
     'allauth.socialaccount',
     # providers
-    'allauth.socialaccount.providers.facebook',
+    # 'allauth.socialaccount.providers.facebook',
     'allauth.socialaccount.providers.github',
-    'allauth.socialaccount.providers.twitter',
-    'allauth.socialaccount.providers.google',
-    'allauth.socialaccount.providers.spotify',
+    # 'allauth.socialaccount.providers.twitter',
+    # 'allauth.socialaccount.providers.google',
+    # 'allauth.socialaccount.providers.spotify',
 
     # cors
     'corsheaders',
