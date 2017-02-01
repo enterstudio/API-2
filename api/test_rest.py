@@ -80,21 +80,42 @@ class PermissionTests(APITestCase):
         superd = Device.objects.create_device(name="SuperDevice", haus=haus)
         empty = Haus.objects.create_haus(name="Empty Crib", owner=admin)
         nohausd = Device.objects.create_device(name="NoHausDevice", haus=empty)
+
         url = reverse('device-detail', args=[superd.uuid])
         response = self.client.get(url, {}, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        url = reverse('device-by-haus', args=[haus.id])
+        response = self.client.get(url, {}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        url = reverse('device-by-haus', args=[empty.id])
+        response = self.client.get(url, {}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
         url = reverse('device-detail', args=[nohausd.uuid])
         response = self.client.get(url, {}, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
         return superd, nohausd
 
     def test_sensor_permissions(self):
         superd, nohausd = self.test_device_permissions()
         sensor = Sensor.objects.create_sensor(superd, "1", 0)
         sensor_403 = Sensor.objects.create_sensor(nohausd, "2", 0)
+
         url = reverse('sensor-detail', args=[sensor.id])
         response = self.client.get(url, {}, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        url = reverse('sensor-by-device', args=[superd.uuid])
+        response = self.client.get(url, {}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        url = reverse('sensor-by-device', args=[nohausd.uuid])
+        response = self.client.get(url, {}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
         url = reverse('sensor-detail', args=[sensor_403.id])
         response = self.client.get(url, {}, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

@@ -9,14 +9,16 @@ from .views import UACList, UACDetail
 haus_urls = [
     url(r'^$', HausList.as_view(), name='haus-lcdapi'),
     url(r'^(?P<pk>[0-9]+)$', HausDetail.as_view(), name='haus-detail'),
-    url(r'^(?P<haus>[0-9]+)/devices$', DeviceListByHaus.as_view()),
+    url(r'^(?P<haus>[0-9]+)/devices$', DeviceListByHaus.as_view(),
+        name='device-by-haus'),
 ]
 
 device_urls = [
     url(r'^$', DeviceList.as_view(), name='device-lcdapi'),
     url(r'^(?P<uuid>[a-z0-9\-]+)$', DeviceDetailByUUID.as_view(),
         name='device-detail'),
-    url(r'^(?P<device>[a-z0-9\-]+)/sensors$', SensorListByDevice.as_view()),
+    url(r'^(?P<device>[a-z0-9\-]+)/sensors$', SensorListByDevice.as_view(),
+        name='sensor-by-device'),
 ]
 
 sensor_urls = [

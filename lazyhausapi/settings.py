@@ -140,5 +140,5 @@ CORS_ORIGIN_ALLOW_ALL = True
 
 try:
     from .local_settings import *
-except ImportError:
-    pass
+except ImportError:  # pragma: no cover
+    pass  # pragma: no cover
