@@ -1,10 +1,6 @@
-from django.urls import reverse
-
-from rest_framework import status
-
 from lazy_extensions.lazy_api_test import LazyAPITestBase, RequestAssertion
 
-from .models import ClientApplication
+from .models import ClientApplication, ClientUserAuthentication
 
 
 class VerificationMiddlewareTest(LazyAPITestBase):
@@ -33,7 +29,7 @@ class VerificationMiddlewareTest(LazyAPITestBase):
             'HTTP_X_CLIENT_VERIFICATION': valid_signature,
         }).execute()
         # Client, no signature
-        ra.update(status=400, kwargs={
+        ra.update(status=403, kwargs={
             'HTTP_X_CLIENT': str(client.pk),
         }).execute()
         # Client, signature
@@ -57,3 +53,30 @@ class VerificationMiddlewareTest(LazyAPITestBase):
                 'HTTP_X_CLIENT': str(client.pk),
                 'HTTP_X_CLIENT_VERIFICATION': signature,
             })
+
+        token = ClientUserAuthentication(client=client, user=admin)
+        token.save()
+
+        ra.update(status=200, kwargs={
+            'HTTP_X_CLIENT': str(client.pk),
+            'HTTP_X_AUTH_TOKEN': token.auth_token,
+        }).execute()
+
+        ra.update(status=400, kwargs={
+            'HTTP_X_AUTH_TOKEN': '',
+        }).execute()
+
+        ra.update(status=401, kwargs={
+            'HTTP_X_CLIENT': str(client.pk),
+            'HTTP_X_AUTH_TOKEN': "RANDOMTOKEN",
+        }).execute()
+
+        ra.update(status=401, kwargs={
+            'HTTP_X_CLIENT': str(fake_client.pk),
+            'HTTP_X_AUTH_TOKEN': token.auth_token,
+        }).execute()
+
+        ra.update(status=401, kwargs={
+            'HTTP_X_CLIENT': str(fake_client.pk),
+            'HTTP_X_AUTH_TOKEN': "RANDOMTOKEN",
+        }).execute()

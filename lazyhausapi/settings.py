@@ -102,6 +102,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'clients.middleware.ClientVerificationMiddleware',
+    'clients.middleware.ClientUserAuthenticationMiddleware',
 ]
 
 ROOT_URLCONF = 'lazyhausapi.urls'
