@@ -10,13 +10,17 @@ from django.conf import settings
 from lazy_extensions.lazyenum import LazyEnum, LazyEnumField
 
 
+def generate_secret():
+    return ''.join(
+        random.choice(string.ascii_uppercase + string.digits)
+        for _ in range(256)
+    )
+
+
 class ClientApplication(models.Model):
     id = models.UUIDField(primary_key=True, editable=False, default=uuid.uuid4)
     name = models.CharField(max_length=200)
-    client_secret = models.CharField(max_length=256, default=''.join(
-        random.choice(string.ascii_uppercase + string.digits)
-        for _ in range(256)
-    ))
+    client_secret = models.CharField(max_length=256, default=generate_secret)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL)
 
     def sign(self, data):

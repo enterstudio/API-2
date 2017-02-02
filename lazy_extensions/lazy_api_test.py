@@ -16,6 +16,7 @@ class RequestAssertion(object):
         self.method = method
         self.status = status
         self.data = data
+        self.kwargs = {}
 
     def update(self, **kwargs):
         self.__dict__.update(kwargs)
@@ -23,12 +24,15 @@ class RequestAssertion(object):
 
     def execute(self):
         if self.method == 'POST':
-            response = self.client.post(self.url, self.data, format='json')
+            response = self.client.post(self.url, self.data, format='json',
+                                        **self.kwargs)
         elif self.method == 'GET':
-            response = self.client.get(self.url, self.data, format='json')
+            response = self.client.get(self.url, self.data, format='json',
+                                       **self.kwargs)
         else:
             raise NotImplementedError
-        assert response.status_code == self.status, 'Status mismatch'
+        assert response.status_code == self.status, \
+            'Mismatch {} =/= {}'.format(response.status_code, self.status)
         return self
 
 
