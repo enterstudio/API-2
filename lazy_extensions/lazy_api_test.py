@@ -24,15 +24,16 @@ class RequestAssertion(object):
 
     def execute(self):
         if self.method == 'POST':
-            response = self.client.post(self.url, self.data, format='json',
-                                        **self.kwargs)
+            print(self.url, "potate")
+            self.response = self.client.post(self.url, self.data,
+                                             format='json', **self.kwargs)
         elif self.method == 'GET':
-            response = self.client.get(self.url, self.data, format='json',
-                                       **self.kwargs)
+            self.response = self.client.get(self.url, self.data, format='json',
+                                            **self.kwargs)
         else:
             raise NotImplementedError
-        assert response.status_code == self.status, \
-            'Mismatch {} =/= {}'.format(response.status_code, self.status)
+        assert self.response.status_code == self.status, \
+            'Mismatch {} =/= {}'.format(self.response.status_code, self.status)
         return self
 
 

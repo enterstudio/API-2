@@ -12,14 +12,11 @@ class ClientVerificationMiddleware(object):
             if "HTTP_X_CLIENT" in request.META:
                 client_id = request.META["HTTP_X_CLIENT"]
                 client = ClientApplication.objects.get(pk=client_id)
-                shared_secret = "\0".join((
-                    request.path,
-                    request.body.decode(),
-                ))
-                if client.verify(shared_secret,
-                                 request.META["HTTP_X_CLIENT_VERIFICATION"]):
-                    request.client_app = client
+                if client.verify_request(
+                        request, request.META["HTTP_X_CLIENT_VERIFICATION"]):
+                    request.client = client
                 else:
+                    print(request.path, request.body)
                     return HttpResponse("Client unverifiable.", status=401)
             else:
                 return HttpResponseBadRequest("No client_id specified.")

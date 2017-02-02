@@ -4,6 +4,8 @@ from rest_framework import status
 
 from lazy_extensions.lazy_api_test import LazyAPITestBase, RequestAssertion
 
+from clients.models import ClientApplication
+
 
 class PermissionTests(LazyAPITestBase):
     def test_lcdapi_admin_only(self):
@@ -20,3 +22,19 @@ class PermissionTests(LazyAPITestBase):
         ra.update(status=status.HTTP_403_FORBIDDEN)
         for url in urls:
             ra.update(url=url).execute()
+
+    def test_token_gen(self):
+        admin, _ = self.create_admin_and_user()
+        client = ClientApplication(owner=admin, name="a")
+        client.save()
+
+        ra = RequestAssertion(
+            self.client, url=reverse("clacsrft"), method="POST", status=201
+        )
+        auth_token = ra.update(kwargs={
+            'HTTP_X_CLIENT': str(client.pk),
+            'HTTP_X_CLIENT_VERIFICATION': client.sign("\0".join((
+                ra.url,
+                '{}',
+            ))),
+        }).execute().response.data["auth_token"]

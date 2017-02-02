@@ -3,6 +3,7 @@ import uuid
 import hashlib
 import string
 import random
+from datetime import datetime
 
 from django.db import models
 from django.conf import settings
@@ -27,18 +28,37 @@ class ClientApplication(models.Model):
         return hashlib.sha512((data + self.client_secret).encode('utf-8')) \
             .hexdigest()
 
+    def sign_request(self, request):
+        shared_secret = "\0".join((
+            request.path,
+            request.body.decode(),
+        ))
+        return self.sign(shared_secret)
+
     def verify(self, data, signature):
         # TODO: Make this IND-CPA secure
         return self.sign(data) == signature
+
+    def verify_request(self, request, signature):
+        return self.sign_request(request) == signature
 
 
 class ClientUserAuthentication(models.Model):
     client = models.ForeignKey(ClientApplication)
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
-    auth_token = models.CharField(max_length=256)
+    auth_token = models.CharField(max_length=256, default=generate_secret)
 
     class Meta:
         unique_together = (('client', 'user'), )
+
+
+class ClientLoginACSRFT(models.Model):
+    client = models.ForeignKey(ClientApplication)
+    auth_token = models.CharField(max_length=256, default=generate_secret)
+    time = models.DateTimeField(default=datetime.now)
+
+    class Meta:
+        unique_together = (('client', 'auth_token'), )
 
 
 class ClientUserPermissions(models.Model):
