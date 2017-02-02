@@ -11,8 +11,7 @@ from lazy_extensions.lazyenum import LazyEnum, LazyEnumField
 
 
 class ClientApplication(models.Model):
-    client_id = models.UUIDField(primary_key=True, editable=False,
-                                 default=uuid.uuid4)
+    id = models.UUIDField(primary_key=True, editable=False, default=uuid.uuid4)
     name = models.CharField(max_length=200)
     client_secret = models.CharField(max_length=256, default=''.join(
         random.choice(string.ascii_uppercase + string.digits)
