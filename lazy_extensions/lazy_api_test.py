@@ -24,7 +24,6 @@ class RequestAssertion(object):
 
     def execute(self):
         if self.method == 'POST':
-            print(self.url, "potate")
             self.response = self.client.post(self.url, self.data,
                                              format='json', **self.kwargs)
         elif self.method == 'GET':
