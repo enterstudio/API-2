@@ -4,7 +4,7 @@ from rest_framework import status
 
 from lazy_extensions.lazy_api_test import LazyAPITestBase, RequestAssertion
 
-from clients.models import ClientApplication
+from clients.models import ClientApplication, ClientLoginACSRFT
 
 
 class PermissionTests(LazyAPITestBase):
@@ -38,3 +38,42 @@ class PermissionTests(LazyAPITestBase):
                 '{}',
             ))),
         }).execute().response.data["auth_token"]
+
+    def test_login(self):
+        admin, _ = self.create_admin_and_user()
+        client = ClientApplication(owner=admin, name="a")
+        client.save()
+
+        ra = RequestAssertion(
+            self.client, url=reverse("clacsrft"), method="POST", status=201
+        )
+        auth_token = ra.update(kwargs={
+            'HTTP_X_CLIENT': str(client.pk),
+            'HTTP_X_CLIENT_VERIFICATION': client.sign("\0".join((
+                ra.url,
+                '{}',
+            ))),
+        }).execute().response.data["auth_token"]
+
+        RequestAssertion(self.client).update(
+            method="POST",
+            url=reverse('ca-login'),
+            data={"username": "Bojangle", "password": "pass",
+                  "token": auth_token, "client": str(client.pk)
+                  }
+        ).execute().update(
+            status=401,
+            data={"username": "Bojangles", "password": "Nob",
+                  "token": auth_token, "client": str(client.pk)
+                  }
+        ).execute().update(
+            status=200,
+            data={"username": "straycat", "password": "pass",
+                  "token": auth_token, "client": str(client.pk)
+                  }
+        ).execute().update(
+            status=401,
+            data={"username": "straycat", "password": "pass",
+                  "token": "bad", "client": str(client.pk)
+                  }
+        ).execute()

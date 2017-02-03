@@ -16,7 +16,6 @@ class ClientVerificationMiddleware(object):
                         request, request.META["HTTP_X_CLIENT_VERIFICATION"]):
                     request.client = client
                 else:
-                    print(request.path, request.body)
                     return HttpResponse("Client unverifiable.", status=401)
             else:
                 return HttpResponseBadRequest("No client_id specified.")
