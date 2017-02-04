@@ -42,9 +42,23 @@ class DevicePermission(permissions.BasePermission):
 class SensorPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         sensor = Sensor.objects.get(id=view.kwargs.get(view.lookup_field))
+        if request.device is not None:
+            return sensor.device == request.device and request.method in (
+                "PUT",
+                "POST",
+                "OPTIONS",
+                "GET",
+            )
         return sensor.device.haus.users.filter(id=request.user.id).exists()
 
     def has_object_permission(self, request, view, obj):
+        if request.device is not None:
+            return obj.device == request.device and request.method in (
+                "PUT",
+                "POST",
+                "OPTIONS",
+                "GET",
+            )
         return obj.device.haus.users.filter(id=request.user.id).exists()
 
 

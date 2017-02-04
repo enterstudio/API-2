@@ -8,6 +8,7 @@ class DeviceVerificationMiddleware(object):
         self.get_response = get_response
 
     def __call__(self, request):
+        request.device = None
         if "HTTP_X_DEVICE_VERIFICATION" in request.META:
             if "HTTP_X_DEVICE" in request.META:
                 device_id = request.META["HTTP_X_DEVICE"]

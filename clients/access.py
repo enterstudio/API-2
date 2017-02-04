@@ -10,4 +10,6 @@ class IsClient(permissions.BasePermission):
 
 class IsLazyAuthenticated(permissions.BasePermission):
     def has_permission(self, request, view):
+        if request.device is not None:
+            return True
         return not isinstance(request.user, AnonymousUser)
