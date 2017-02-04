@@ -15,6 +15,7 @@ class LazyEnum(object):
                 (self.value, self.name),
                 (self.name, self.value),
                 self.value,
+                str(self.value),
                 self.name,
                 self.name.upper(),
             ]
