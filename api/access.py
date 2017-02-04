@@ -8,7 +8,8 @@ from .models import Device, Sensor, Haus
 
 
 class LCAPIPermission(permissions.BasePermission):
-    def has_permission(self, request, view):
+    @classmethod
+    def has_permission(cls, request, view):
         if request.method == 'POST':
             # Allow post
             return True
@@ -22,25 +23,30 @@ class LCAPIPermission(permissions.BasePermission):
 
 
 class HausPermission(permissions.BasePermission):
-    def has_permission(self, request, view):
+    @classmethod
+    def has_permission(cls, request, view):
         haus = Haus.objects.get(id=view.kwargs.get(view.lookup_field))
         return haus.users.filter(id=request.user.id).exists()
 
-    def has_object_permission(self, request, view, obj):
+    @classmethod
+    def has_object_permission(cls, request, view, obj):
         return obj.users.filter(id=request.user.id).exists()
 
 
 class DevicePermission(permissions.BasePermission):
-    def has_permission(self, request, view):
+    @classmethod
+    def has_permission(cls, request, view):
         device = Device.objects.get(uuid=view.kwargs.get(view.lookup_field))
         return device.haus.users.filter(id=request.user.id).exists()
 
-    def has_object_permission(self, request, view, obj):
+    @classmethod
+    def has_object_permission(cls, request, view, obj):
         return obj.haus.users.filter(id=request.user.id).exists()
 
 
 class SensorPermission(permissions.BasePermission):
-    def has_permission(self, request, view):
+    @classmethod
+    def has_permission(cls, request, view):
         sensor = Sensor.objects.get(id=view.kwargs.get(view.lookup_field))
         if request.device is not None:
             return sensor.device == request.device and request.method in (
@@ -51,7 +57,8 @@ class SensorPermission(permissions.BasePermission):
             )
         return sensor.device.haus.users.filter(id=request.user.id).exists()
 
-    def has_object_permission(self, request, view, obj):
+    @classmethod
+    def has_object_permission(cls, request, view, obj):
         if request.device is not None:
             return obj.device == request.device and request.method in (
                 "PUT",
@@ -63,5 +70,5 @@ class SensorPermission(permissions.BasePermission):
 
 
 # class UnlimitedPermission(permissions.BasePermission):
-#     def has_object_permission(self, request, view, obj):
+#     def has_object_permission(cls, request, view, obj):
 #         return True

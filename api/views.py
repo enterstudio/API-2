@@ -1,8 +1,4 @@
-from django.http import HttpResponse
-from rest_framework.renderers import JSONRenderer
-from rest_framework import viewsets, routers
 from rest_framework import generics
-from rest_framework.urlpatterns import format_suffix_patterns
 from rest_framework.permissions import IsAdminUser
 
 from .models import Haus, Device, Sensor, UAC

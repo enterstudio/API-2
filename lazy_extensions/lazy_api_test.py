@@ -14,19 +14,20 @@ def create_user(username, email, pw, is_staff):
 
 
 class RequestAssertion(object):
-    def __init__(self, client, url='/', method='GET', status=200, data={}):
+    def __init__(self, client, url='/', method='GET', status=200, data=None):
         self.client = client
         self.url = url
         self.method = method
         self.status = status
-        self.data = data
+        self.data = data or {}
         self.kwargs = {}
 
     def update(self, **kwargs):
         self.__dict__.update(kwargs)
         return self
 
-    def make_kwargs(self, base, update):
+    @classmethod
+    def make_kwargs(cls, base, update):
         new_dict = base.copy()
         new_dict.update(update)
         return new_dict
@@ -44,8 +45,12 @@ class RequestAssertion(object):
             )
         else:
             raise NotImplementedError
-        assert self.response.status_code == self.status, \
-            'Mismatch {} =/= {}'.format(self.response.status_code, self.status)
+        if self.response.status_code != self.status:
+            raise AssertionError(
+                'Mismatch {} =/= {}'.format(
+                    self.response.status_code, self.status
+                )
+            )
         return self
 
 
@@ -54,7 +59,8 @@ class LazyAPITestBase(APITestCase):
     def setUp(self):
         self.client.lazy_auth = {}
 
-    def create_admin_and_user(self):
+    @classmethod
+    def create_admin_and_user(cls):
         admin = create_user('Bojangle', 'bojang@heav.en', 'pass', True)
         user = create_user('straycat', 'stray@cat.com', 'pass', False)
         return admin, user

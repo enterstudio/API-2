@@ -53,7 +53,7 @@ class ClientPermissionsList(generics.ListAPIView):
 
 
 class ClientLogin(View):
-
+    @classmethod
     def post(self, request):
         jsn = json.loads(request.body.decode())
         if all(x in jsn for x in ["username", "password", "client"]):
@@ -81,7 +81,7 @@ class ClientLogin(View):
 
 
 class ClientLogout(View):
-
+    @classmethod
     def post(self, request):
         if not isinstance(request.user, AnonymousUser):
             cua = request.user.current_authentication

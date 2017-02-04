@@ -8,7 +8,7 @@ from rest_framework import status
 
 from lazy_extensions.lazy_api_test import LazyAPITestBase, RequestAssertion
 
-from clients.models import ClientApplication, ClientLoginACSRFT
+from clients.models import ClientApplication
 from clients.models import ClientUserPermission, ClientUserAuthentication
 
 

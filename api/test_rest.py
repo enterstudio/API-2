@@ -104,6 +104,10 @@ class PermissionTests(LazyAPITestBase):
         ).execute().update(
             url=reverse('sensor-detail', args=[sensor_403.id]), status=403
         ).execute()
+        with self.assertRaises(AssertionError):
+            ra.update(
+                url=reverse('sensor-detail', args=[sensor_403.id]), status=200
+            ).execute()
 
     def test_the_tests(self):
         ra = RequestAssertion(self.client, status=403, method="RAIS")

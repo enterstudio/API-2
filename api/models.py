@@ -1,7 +1,6 @@
-import string
-import random
-
-import uuid
+from uuid import uuid4
+from os import urandom
+from base64 import b64encode
 
 from django.db import models
 from django.conf import settings
@@ -61,10 +60,13 @@ class UAC(models.Model):
         unique_together = (('user', 'haus', ), )
 
 
+def make_secret():
+    return str(b64encode(urandom(256)))
+
+
 class DeviceManager(models.Manager):
     def create_device(self, name, haus=None, last_ping=None):
-        secret = ''.join(random.choice(string.ascii_uppercase + string.digits)
-                         for _ in range(256))
+        secret = make_secret()
         device = self.create(name=name, haus=haus, last_ping=last_ping,
                              setup_secret=secret)
         return device
@@ -72,11 +74,11 @@ class DeviceManager(models.Manager):
 
 class Device(LazySigner, models.Model):
     uuid = models.UUIDField(primary_key=True, editable=False,
-                            default=uuid.uuid4)
+                            default=uuid4)
     name = models.CharField(max_length=200)
     last_ping = models.DateTimeField(db_index=True, blank=True, null=True)
     haus = models.ForeignKey(Haus, blank=True, null=True)
-    setup_secret = models.CharField(max_length=256)
+    setup_secret = models.CharField(max_length=256, default=make_secret)
 
     objects = DeviceManager()
 
