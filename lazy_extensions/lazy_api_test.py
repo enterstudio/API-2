@@ -1,6 +1,8 @@
 from rest_framework.test import APITestCase
 from django.contrib.auth.models import User
 
+from clients.models import ClientUserAuthentication
+
 
 def create_user(username, email, pw, is_staff):
     user = User.objects.create_user(username, email, pw)
@@ -22,13 +24,22 @@ class RequestAssertion(object):
         self.__dict__.update(kwargs)
         return self
 
+    def make_kwargs(self, base, update):
+        new_dict = base.copy()
+        new_dict.update(update)
+        return new_dict
+
     def execute(self):
         if self.method == 'POST':
-            self.response = self.client.post(self.url, self.data,
-                                             format='json', **self.kwargs)
+            self.response = self.client.post(
+                self.url, self.data, format='json',
+                **self.make_kwargs(self.kwargs, self.client.lazy_auth)
+            )
         elif self.method == 'GET':
-            self.response = self.client.get(self.url, self.data, format='json',
-                                            **self.kwargs)
+            self.response = self.client.get(
+                self.url, self.data, format='json',
+                **self.make_kwargs(self.kwargs, self.client.lazy_auth)
+            )
         else:
             raise NotImplementedError
         assert self.response.status_code == self.status, \
@@ -38,13 +49,30 @@ class RequestAssertion(object):
 
 class LazyAPITestBase(APITestCase):
 
+    def setUp(self):
+        self.client.lazy_auth = {}
+
     def create_admin_and_user(self):
         admin = create_user('Bojangle', 'bojang@heav.en', 'pass', True)
         user = create_user('straycat', 'stray@cat.com', 'pass', False)
         return admin, user
 
+    def login(self, client_app, username, password):
+        u = authenticate(username=username, password=password)
+        if u is not None:
+            uac = ClientUserAuthentication.objects.create(
+                user=u,
+                client=client_app
+            )
+            uac.save()
+            self.client.lazy_auth = {
+                'HTTP_X_CLIENT': str(client.pk),
+                'HTTP_X_AUTH_TOKEN': auth_token,
+            }
+        return u
+
     def login_user(self):
-        return self.client.login(username='straycat', password='pass')
+        return self.login(username='straycat', password='pass')
 
     def login_admin(self):
-        return self.client.login(username='Bojangle', password='pass')
+        return self.login(username='Bojangle', password='pass')

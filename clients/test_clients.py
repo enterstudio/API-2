@@ -123,4 +123,5 @@ class PermissionTests(LazyAPITestBase):
                 'HTTP_X_CLIENT': str(client.pk),
                 'HTTP_X_AUTH_TOKEN': auth_token,
             }
-        ).execute().response.content.decode()))
+        ).execute()
+         .response.content.decode()) == [{'permission_type': [1, 'View']}])
