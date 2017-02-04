@@ -11,13 +11,18 @@ from .access import LCAPIPermission
 from .access import DevicePermission, SensorPermission, HausPermission
 
 from clients.access import IsLazyAuthenticated
+from django.db.models import Q
 
 
 class HausList(generics.ListCreateAPIView):
     queryset = Haus.objects.all()
     serializer_class = HausSerializer
-    permission_classes = (IsLazyAuthenticated,
-                          LCAPIPermission,)
+    permission_classes = (IsLazyAuthenticated,)
+
+    def get_queryset(self):
+        queryset = super(HausList, self).get_queryset()
+        u = self.request.user
+        return queryset.filter(Q(users__in=[u]) | Q(owner=u))
 
 
 class HausDetail(generics.RetrieveUpdateDestroyAPIView):

@@ -8,6 +8,8 @@ from .models import Haus, Device, UAC, Sensor
 
 from clients.models import ClientApplication
 
+from django.db import models
+
 
 class GeneralTests(LazyAPITestBase):
     def test_create_haus(self):
@@ -34,20 +36,24 @@ class GeneralTests(LazyAPITestBase):
 
 class PermissionTests(LazyAPITestBase):
     def test_lcdapi_admin_only(self):
-        admin, _ = self.create_admin_and_user()
+        admin, user = self.create_admin_and_user()
         client = ClientApplication(owner=admin, name="a")
         client.save()
         self.login_admin(client)
         urls = [reverse(x + "-lcdapi")
                 for x in ["haus", "sensor", "device", "uac"]]
 
+        haus = Haus.objects.create(owner=user, name="lel")
+        haus.save()
         ra = RequestAssertion(self.client, method="GET", status=200)
         for url in urls:
-            ra.update(url=url).execute()
-        self.login_user(client)
-        ra.update(status=status.HTTP_403_FORBIDDEN)
-        for url in urls:
-            ra.update(url=url).execute()
+            print(ra.update(url=url).execute().response.content)
+        RequestAssertion(
+            self.client, method="POST", status=201,
+            url=reverse("device-lcdapi"), data={
+                "name": "hi"
+            }
+        ).execute()
 
     def test_haus_permissions(self):
         admin, user = self.create_admin_and_user()
