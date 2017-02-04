@@ -51,14 +51,15 @@ class ClientLogin(View):
             domain = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
             if client.domain != domain:
                 return HttpResponse('Unauthorized', status=401)
-            if ClientLoginACSRFT.objects.filter(
-                auth_token=jsn["token"]
-            ).exists() and u is not None:
-                cua = ClientUserAuthentication(
-                    client=ClientApplication.objects.get(id=jsn["client"]),
-                    user=User.objects.get(username=jsn["username"])
-                )
-                return HttpResponse(
-                    json.dumps({"auth_token": cua.auth_token})
-                )
+            cla = ClientLoginACSRFT.objects.filter(auth_token=jsn["token"])
+            if cla:
+                cla.delete()
+                if u is not None:
+                    cua = ClientUserAuthentication(
+                        client=ClientApplication.objects.get(id=jsn["client"]),
+                        user=User.objects.get(username=jsn["username"])
+                    )
+                    return HttpResponse(
+                        json.dumps({"auth_token": cua.auth_token})
+                    )
         return HttpResponse('Unauthorized', status=401)
