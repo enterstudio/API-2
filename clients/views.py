@@ -1,4 +1,8 @@
 import json
+try:
+    from urlparse import urlparse as urlparse
+except ImportError:
+    from urllib.parse import urlparse as urlparse
 
 from django.contrib.auth.models import User
 
@@ -38,17 +42,23 @@ class ClientLogin(View):
 
     def post(self, request):
         jsn = json.loads(request.body.decode())
-        u = authenticate(username=jsn["username"], password=jsn["password"])
-        if ClientLoginACSRFT.objects.filter(
-            auth_token=jsn["token"]
-        ).exists() and u is not None:
-            cua = ClientUserAuthentication(
-                client=ClientApplication.objects.get(id=jsn["client"]),
-                user=User.objects.get(username=jsn["username"])
-            )
-            return HttpResponse(
-                json.dumps({"auth_token": cua.auth_token})
-            )
-        bad = HttpResponse(json.dumps({}))
-        bad.status_code = 401
-        return bad
+        if all(x in jsn for x in ["username", "password", "client"]):
+            u = authenticate(username=jsn["username"],
+                             password=jsn["password"])
+            # hASHTAG Security
+            client = ClientApplication.objects.get(id=jsn["client"])
+            parsed_uri = urlparse(request.META["HTTP_REFERER"])
+            domain = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
+            if client.domain != domain:
+                return HttpResponse('Unauthorized', status=401)
+            if ClientLoginACSRFT.objects.filter(
+                auth_token=jsn["token"]
+            ).exists() and u is not None:
+                cua = ClientUserAuthentication(
+                    client=ClientApplication.objects.get(id=jsn["client"]),
+                    user=User.objects.get(username=jsn["username"])
+                )
+                return HttpResponse(
+                    json.dumps({"auth_token": cua.auth_token})
+                )
+        return HttpResponse('Unauthorized', status=401)

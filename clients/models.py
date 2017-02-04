@@ -24,6 +24,9 @@ class ClientApplication(models.Model):
     client_secret = models.CharField(max_length=256, default=generate_secret)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL)
 
+    # The domain, in the format https://do.main/
+    domain = models.CharField(max_length=100, default="https://example.com/")
+
     def sign(self, data):
         return hashlib.sha512((data + self.client_secret).encode('utf-8')) \
             .hexdigest()

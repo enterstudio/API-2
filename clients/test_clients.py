@@ -56,6 +56,7 @@ class PermissionTests(LazyAPITestBase):
         }).execute().response.data["auth_token"]
 
         RequestAssertion(self.client).update(
+            kwargs={'HTTP_REFERER': "https://example.com"},
             method="POST",
             url=reverse('ca-login'),
             data={"username": "Bojangle", "password": "pass",
