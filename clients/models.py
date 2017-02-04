@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 import uuid
-import hashlib
 import string
 import random
 from datetime import datetime
@@ -9,6 +8,7 @@ from django.db import models
 from django.conf import settings
 
 from lazy_extensions.lazyenum import LazyEnum, LazyEnumField
+from lazy_extensions.models import LazySigner
 
 
 def generate_secret():
@@ -18,7 +18,7 @@ def generate_secret():
     )
 
 
-class ClientApplication(models.Model):
+class ClientApplication(LazySigner, models.Model):
     id = models.UUIDField(primary_key=True, editable=False, default=uuid.uuid4)
     name = models.CharField(max_length=200)
     client_secret = models.CharField(max_length=256, default=generate_secret)
@@ -27,23 +27,8 @@ class ClientApplication(models.Model):
     # The domain, in the format https://do.main/
     domain = models.CharField(max_length=100, default="https://example.com/")
 
-    def sign(self, data):
-        return hashlib.sha512((data + self.client_secret).encode('utf-8')) \
-            .hexdigest()
-
-    def sign_request(self, request):
-        shared_secret = "\0".join((
-            request.path,
-            request.body.decode(),
-        ))
-        return self.sign(shared_secret)
-
-    def verify(self, data, signature):
-        # TODO: Make this IND-CPA secure
-        return self.sign(data) == signature
-
-    def verify_request(self, request, signature):
-        return self.sign_request(request) == signature
+    def lazy_secret(self):
+        return self.client_secret
 
 
 class ClientUserAuthentication(models.Model):
