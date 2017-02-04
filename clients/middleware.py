@@ -1,6 +1,10 @@
+import json
+
 from django.http import HttpResponseBadRequest, HttpResponse
 
 from .models import ClientApplication, ClientUserAuthentication
+
+from lazy_extensions.lazy_errors import errors
 
 
 class ClientVerificationMiddleware(object):
@@ -16,9 +20,13 @@ class ClientVerificationMiddleware(object):
                         request, request.META["HTTP_X_CLIENT_VERIFICATION"]):
                     request.client = client
                 else:
-                    return HttpResponse("Client unverifiable.", status=401)
+                    return HttpResponse(json.dumps({
+                        "error": errors[0],
+                    }), status=401)
             else:
-                return HttpResponseBadRequest("No client_id specified.")
+                return HttpResponseBadRequest(json.dumps({
+                    "error": errors[1],
+                }))
         return self.get_response(request)
 
 
@@ -29,7 +37,9 @@ class ClientUserAuthenticationMiddleware(object):
     def __call__(self, request):
         if "HTTP_X_AUTH_TOKEN" in request.META:
             if "HTTP_X_CLIENT" not in request.META:
-                return HttpResponseBadRequest("No client id")
+                return HttpResponseBadRequest(json.dumps({
+                    "error": errors[1],
+                }))
             client_pk = request.META["HTTP_X_CLIENT"]
             try:
                 cua = ClientUserAuthentication.objects.get(
@@ -37,7 +47,9 @@ class ClientUserAuthenticationMiddleware(object):
                     auth_token=request.META["HTTP_X_AUTH_TOKEN"]
                 )
             except ClientUserAuthentication.DoesNotExist:
-                return HttpResponse("Invalid auth token.", status=401)
+                return HttpResponse(json.dumps({
+                    "error": errors[2],
+                }), status=401)
             request.user = cua.user
             request.user.current_authentication = cua
         return self.get_response(request)
