@@ -7,6 +7,7 @@ from django.db import models
 from django.conf import settings
 
 from lazy_extensions.lazyenum import LazyEnum, LazyEnumField
+from lazy_extensions.models import LazySigner
 
 
 class HausManager(models.Manager):
@@ -69,7 +70,7 @@ class DeviceManager(models.Manager):
         return device
 
 
-class Device(models.Model):
+class Device(LazySigner, models.Model):
     uuid = models.UUIDField(primary_key=True, editable=False,
                             default=uuid.uuid4)
     name = models.CharField(max_length=200)
@@ -78,6 +79,9 @@ class Device(models.Model):
     setup_secret = models.CharField(max_length=256)
 
     objects = DeviceManager()
+
+    def lazy_secret(self):
+        return self.setup_secret
 
     def __str__(self):
         return "{0.name}".format(self)
