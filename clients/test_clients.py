@@ -38,8 +38,7 @@ class PermissionTests(LazyAPITestBase):
 
     def test_token_gen(self):
         admin, _ = self.create_admin_and_user()
-        client = ClientApplication(owner=admin, name="a")
-        client.save()
+        client = ClientApplication(owner=admin, name="a").save()
 
         ra = RequestAssertion(
             self.client, url=reverse("clacsrft"), method="POST", status=201
@@ -48,8 +47,7 @@ class PermissionTests(LazyAPITestBase):
 
     def test_login(self):
         admin, _ = self.create_admin_and_user()
-        client = ClientApplication(owner=admin, name="a")
-        client.save()
+        client = ClientApplication(owner=admin, name="a").save()
 
         auth_ra = RequestAssertion(
             self.client, url=reverse("clacsrft"), method="POST", status=201
