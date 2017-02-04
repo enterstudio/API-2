@@ -23,21 +23,23 @@ class PermissionTests(LazyAPITestBase):
                 '{}',
             ))),
         }).execute().response.data["auth_token"]
-    #
-    # def test_lcdapi_admin_only(self):
-    #     self.create_admin_and_user()
-    #
-    #     self.login_admin()
-    #     urls = [reverse(x + "-lcdapi")
-    #             for x in ["ca"]]
-    #
-    #     ra = RequestAssertion(self.client, method="GET", status=200)
-    #     for url in urls:
-    #         ra.update(url=url).execute()
-    #     self.login_user()
-    #     ra.update(status=status.HTTP_403_FORBIDDEN)
-    #     for url in urls:
-    #         ra.update(url=url).execute()
+
+    def test_lcdapi_admin_only(self):
+        admin, _ = self.create_admin_and_user()
+
+        client = ClientApplication(owner=admin, name="a")
+        client.save()
+        self.login_admin(client)
+        urls = [reverse(x + "-lcdapi")
+                for x in ["ca"]]
+
+        ra = RequestAssertion(self.client, method="GET", status=200)
+        for url in urls:
+            ra.update(url=url).execute()
+        self.login_user(client)
+        ra.update(status=status.HTTP_403_FORBIDDEN)
+        for url in urls:
+            ra.update(url=url).execute()
 
     def test_token_gen(self):
         admin, _ = self.create_admin_and_user()
