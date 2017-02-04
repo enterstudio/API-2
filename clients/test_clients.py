@@ -92,6 +92,20 @@ class PermissionTests(LazyAPITestBase):
                   }
         ).execute()
 
+        ClientUserAuthentication.objects.all().delete()
+
+        ra = RequestAssertion(self.client).update(
+            kwargs={'HTTP_REFERER': "https://example.com"},
+            method="POST",
+            url=reverse('ca-logout'),
+        )
+        #  Login and Logout in succession
+        for _ in range(3):
+            self.login_user(client)
+            ra.execute()
+        # Now that the uac doesn't exist, must return 401
+        ra.update(status=401).execute()
+
     def test_get_permissions(self):
         admin, _ = self.create_admin_and_user()
         client = ClientApplication(owner=admin, name="a")

@@ -62,7 +62,7 @@ class LazyAPITestBase(APITestCase):
     def login(self, client_app, username, password):
         u = authenticate(username=username, password=password)
         if u is not None:
-            uac = ClientUserAuthentication.objects.create(
+            uac, _ = ClientUserAuthentication.objects.get_or_create(
                 user=u,
                 client=client_app
             )

@@ -19,6 +19,7 @@ from clients.models import ClientUserAuthentication, ClientUserPermission
 from clients.serializers import CASerializer, ClientLoginACSRFTSerializer
 from clients.serializers import ClientUserPermissionSerializer
 from clients.access import IsClient, IsLazyAuthenticated
+from django.contrib.auth.models import AnonymousUser
 from api.access import LCAPIPermission
 
 
@@ -68,7 +69,7 @@ class ClientLogin(View):
             if cla:
                 cla.delete()
                 if u is not None:
-                    cua = ClientUserAuthentication(
+                    cua, _ = ClientUserAuthentication.objects.get_or_create(
                         client=ClientApplication.objects.get(id=jsn["client"]),
                         user=User.objects.get(username=jsn["username"])
                     )
@@ -77,3 +78,13 @@ class ClientLogin(View):
                         json.dumps({"auth_token": cua.auth_token})
                     )
         return HttpResponse('Unauthorized', status=401)
+
+
+class ClientLogout(View):
+
+    def post(self, request):
+        if not isinstance(request.user, AnonymousUser):
+            cua = request.user.current_authentication
+            cua.delete()
+            return HttpResponse('Logged out')
+        return HttpResponse('Unauthorized', status=401)  # pragma: no cover
