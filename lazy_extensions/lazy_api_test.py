@@ -1,6 +1,8 @@
 from rest_framework.test import APITestCase
 from django.contrib.auth.models import User
 
+from django.contrib.auth import authenticate
+
 from clients.models import ClientUserAuthentication
 
 
@@ -66,13 +68,13 @@ class LazyAPITestBase(APITestCase):
             )
             uac.save()
             self.client.lazy_auth = {
-                'HTTP_X_CLIENT': str(client.pk),
-                'HTTP_X_AUTH_TOKEN': auth_token,
+                'HTTP_X_CLIENT': str(client_app.pk),
+                'HTTP_X_AUTH_TOKEN': uac.auth_token,
             }
         return u
 
-    def login_user(self):
-        return self.login(username='straycat', password='pass')
+    def login_user(self, client_app):
+        return self.login(client_app, 'straycat', 'pass')
 
-    def login_admin(self):
-        return self.login(username='Bojangle', password='pass')
+    def login_admin(self, client_app):
+        return self.login(client_app, 'Bojangle', 'pass')
