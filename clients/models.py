@@ -64,8 +64,8 @@ class ClientLoginACSRFT(models.Model):
         unique_together = (('client', 'auth_token'), )
 
 
-class ClientUserPermissions(models.Model):
-    PERMISSIONS = LazyEnum("Test")
+class ClientUserPermission(models.Model):
+    PERMISSIONS = LazyEnum("*", "View", "Create")
 
     auth = models.ForeignKey(ClientUserAuthentication)
     permission_type = LazyEnumField(choices=PERMISSIONS)

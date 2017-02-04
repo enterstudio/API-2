@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.contrib.auth import get_user_model
 
 from .models import ClientApplication, ClientUserAuthentication, \
-    ClientUserPermissions
+    ClientUserPermission
 
 User = get_user_model()
 

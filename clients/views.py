@@ -15,9 +15,10 @@ from django.views import View
 from django.http import HttpResponse
 
 from clients.models import ClientApplication, ClientLoginACSRFT
-from clients.models import ClientUserAuthentication
+from clients.models import ClientUserAuthentication, ClientUserPermission
 from clients.serializers import CASerializer, ClientLoginACSRFTSerializer
-from clients.access import IsClient
+from clients.serializers import ClientUserPermissionSerializer
+from clients.access import IsClient, IsLazyAuthenticated
 from api.access import LCAPIPermission
 
 
@@ -36,6 +37,18 @@ class ClientGenToken(generics.CreateAPIView):
     def perform_create(self, serializer):
         instance = serializer.save(client=self.request.client)
         return instance
+
+
+class ClientPermissionsList(generics.ListAPIView):
+    queryset = ClientUserPermission.objects.all()
+    serializer_class = ClientUserPermissionSerializer
+    permission_classes = (IsLazyAuthenticated,)
+
+    def get_queryset(self):
+        queryset = super(ClientPermissionsList, self).get_queryset()
+        return queryset.filter(
+            auth=self.request.user.current_authentication
+        )
 
 
 class ClientLogin(View):
@@ -59,6 +72,7 @@ class ClientLogin(View):
                         client=ClientApplication.objects.get(id=jsn["client"]),
                         user=User.objects.get(username=jsn["username"])
                     )
+                    cua.save()
                     return HttpResponse(
                         json.dumps({"auth_token": cua.auth_token})
                     )
