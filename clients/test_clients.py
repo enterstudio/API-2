@@ -12,7 +12,7 @@ from clients.models import ClientApplication, ClientLoginACSRFT
 class PermissionTests(LazyAPITestBase):
 
     @classmethod
-    def get_auth_token(cls, client, ra):
+    def get_auth_token(self, client, ra):
         return ra.update(kwargs={
             'HTTP_X_CLIENT': str(client.pk),
             'HTTP_X_CLIENT_VERIFICATION': client.sign("\0".join((
